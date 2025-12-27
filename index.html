@@ -10,7 +10,7 @@
 
 <style>
 :root {
-  --bg-color: #0f0f0f; /* default dark */
+  --bg-color: #0f0f0f;
   --text-color: #f1f5f9;
   --folder-bg: #0ea5e9;
   --folder-text: #fff;
@@ -43,7 +43,6 @@ a{text-decoration:none;font-weight:bold}
 
 /* AI circular button */
 #aiCircle{
-  display:none;
   width:90px;
   height:90px;
   border-radius:50%;
@@ -57,7 +56,7 @@ a{text-decoration:none;font-weight:bold}
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
   z-index:1000;
   transition: all 0.3s ease, transform 0.3s ease;
-  transform:scale(0);
+  background:var(--ai-bg);
 }
 
 /* AI box */
@@ -136,7 +135,7 @@ Amount: 199 টাকা <br><br>
 </div>
 
 <!-- AI circular button with Lottie robot -->
-<div id="aiCircle">
+<div id="aiCircle" onclick="toggleAI()">
   <lottie-player id="robotAnim" src="https://assets2.lottiefiles.com/packages/lf20_vx6zgmvy.json"  background="transparent"  speed="1"  style="width:80px; height:80px;" loop autoplay></lottie-player>
 </div>
 
@@ -153,7 +152,7 @@ const PASSWORD = "SIAM2025";
 const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; 
 const OMDB_API_KEY = "ac57015f";
 
-// Unlock functions
+// Unlock & UI
 function toggle(id){let e=document.getElementById(id); e.style.display=e.style.display==="block"?"none":"block";}
 function unlockAll(){
   let p=document.getElementById("passInput").value;
@@ -161,11 +160,8 @@ function unlockAll(){
     localStorage.setItem("ok","1");
     document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
     document.getElementById("paymentBox").style.display="none";
-    showAICircle();
   }else{ alert("ভুল পাসওয়ার্ড"); }
 }
-function showAICircle(){ let c=document.getElementById("aiCircle"); c.style.display="flex"; setTimeout(()=>{c.style.transform="scale(1)";},50);}
-if(localStorage.getItem("ok")){document.querySelectorAll(".unlock").forEach(e=>e.style.display="block"); document.getElementById("paymentBox").style.display="none"; showAICircle();}
 function togglePassword(){ let i=document.getElementById("passInput"); i.type=i.type==="password"?"text":"password";}
 
 document.getElementById("emailForm").onsubmit=function(e){
