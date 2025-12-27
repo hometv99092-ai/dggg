@@ -6,12 +6,35 @@
 <title>Movie & Game Drive</title>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;padding:20px}
+/* 🔹 Theme Colors */
+:root {
+  --bg-color: #0f0f0f; /* Dark by default */
+  --text-color: #f1f5f9;
+  --folder-bg: #0ea5e9;
+  --folder-text: #fff;
+  --payment-bg: #fef3c7;
+  --payment-text: #000;
+  --ai-bg: #ef4444;
+  --ai-text: #fff;
+}
+
+/* 🔹 Sci-Fi background */
+body {
+  font-family:Arial;
+  background: radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f);
+  background-image: url('https://images.unsplash.com/photo-1622101103666-0e3f248b0a2e?auto=format&fit=crop&w=1950&q=80');
+  background-size: cover;
+  background-blend-mode: overlay;
+  color: var(--text-color);
+  padding:20px;
+  transition: all 0.3s ease;
+}
+
 h1{text-align:center}
-.folder{background:#0ea5e9;color:#fff;padding:8px;margin:6px 0;border-radius:6px;cursor:pointer}
+.folder{background:var(--folder-bg);color:var(--folder-text);padding:8px;margin:6px 0;border-radius:6px;cursor:pointer}
 .subfolder{display:none;margin-left:20px;transition:all 0.3s ease;}
 .link{display:none;margin:6px 0}
-.payment-box{background:#fef3c7;padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
+.payment-box{background:var(--payment-bg);color:var(--payment-text);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
 button{background:#22c55e;border:none;color:white;padding:8px 14px;border-radius:6px;cursor:pointer}
 input{padding:8px;width:180px}
 .show-pass-btn{background:#3b82f6;color:#fff;border:none;padding:8px;border-radius:6px}
@@ -22,12 +45,12 @@ a{text-decoration:none;font-weight:bold}
   display:none;
   width:80px;
   height:80px;
-  background:#ef4444;
+  background:var(--ai-bg);
   border-radius:50%;
   display:flex;
   justify-content:center;
   align-items:center;
-  color:#fff;
+  color:var(--ai-text);
   font-weight:bold;
   font-size:14px;
   cursor:pointer;
@@ -61,12 +84,29 @@ a{text-decoration:none;font-weight:bold}
 #aiBox button{padding:6px 10px}
 #resultBox{margin-top:10px;background:#fefefe;padding:8px;border-radius:8px;max-height:300px;overflow-y:auto}
 #resultBox img{max-width:120px;display:block;margin-bottom:5px}
+
+/* 🔹 Theme Switcher Button */
+#themeBtn{
+  position:fixed;
+  top:20px;
+  right:30px;
+  padding:10px 14px;
+  background:#22c55e;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:1002;
+}
 </style>
 </head>
 
 <body>
 
 <h1>📂 Movie & Game Drive</h1>
+
+<!-- Theme Switcher -->
+<button id="themeBtn" onclick="toggleTheme()">Theme</button>
 
 <div class="payment-box" id="paymentBox">
 <h3>🔐 সাবস্ক্রিপশন</h3>
@@ -112,7 +152,7 @@ Amount: 199 টাকা <br><br>
 <script>
 const PASSWORD = "SIAM2025";   
 const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; 
-const OMDB_API_KEY = "ac57015f"; 
+const OMDB_API_KEY = "ac57015f"; // 🔑 তোমার কোডড API key
 
 function toggle(id){
   let e=document.getElementById(id);
@@ -206,11 +246,39 @@ async function searchMovie(){
         box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;
       }
     }else{
-      box.innerHTML="Movie পাওয়া যায়নি 😔 ভালো করে নাম লিখো";
+      box.innerHTML="Movie পাওয়া যায়নি 😔";
     }
   }catch(err){
     console.log(err);
     box.innerHTML="Error হয়েছে, পরে চেষ্টা করুন";
+  }
+}
+
+// 🔹 Theme Switcher
+function toggleTheme(){
+  let root=document.documentElement;
+  if(root.style.getPropertyValue('--bg-color') === '#ffffff'){
+    // Switch to dark
+    root.style.setProperty('--bg-color','#0f0f0f');
+    root.style.setProperty('--text-color','#f1f5f9');
+    root.style.setProperty('--folder-bg','#0ea5e9');
+    root.style.setProperty('--folder-text','#fff');
+    root.style.setProperty('--payment-bg','#fef3c7');
+    root.style.setProperty('--payment-text','#000');
+    root.style.setProperty('--ai-bg','#ef4444');
+    root.style.setProperty('--ai-text','#fff');
+    document.body.style.background='radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f)';
+  }else{
+    // Switch to light
+    root.style.setProperty('--bg-color','#ffffff');
+    root.style.setProperty('--text-color','#000');
+    root.style.setProperty('--folder-bg','#3b82f6');
+    root.style.setProperty('--folder-text','#fff');
+    root.style.setProperty('--payment-bg','#fde68a');
+    root.style.setProperty('--payment-text','#000');
+    root.style.setProperty('--ai-bg','#ef4444');
+    root.style.setProperty('--ai-text','#fff');
+    document.body.style.background='radial-gradient(circle at 20% 30%, #ffffff, #e0e0e0)';
   }
 }
 </script>
