@@ -1,4 +1,4 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +9,7 @@
 body{font-family:Arial;background:#f1f5f9;padding:20px}
 h1{text-align:center}
 .folder{background:#0ea5e9;color:#fff;padding:8px;margin:6px 0;border-radius:6px;cursor:pointer}
-.subfolder{display:none;margin-left:20px}
+.subfolder{display:none;margin-left:20px;transition:all 0.3s ease;}
 .link{display:none;margin:6px 0}
 .payment-box{background:#fef3c7;padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
 button{background:#22c55e;border:none;color:white;padding:8px 14px;border-radius:6px;cursor:pointer}
@@ -36,11 +36,14 @@ a{text-decoration:none;font-weight:bold}
   right:30px;
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
   z-index:1000;
+  transition:all 0.3s ease;
+  transform:scale(0);
 }
 
 /* 🔹 AI Box */
 #aiBox{
   display:none;
+  opacity:0;
   position:fixed;
   bottom:120px;
   right:30px;
@@ -50,6 +53,8 @@ a{text-decoration:none;font-weight:bold}
   padding:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
   z-index:1001;
+  transition:opacity 0.3s ease, transform 0.3s ease;
+  transform:translateY(20px);
 }
 
 #aiBox input{width:70%;padding:6px;margin-right:5px}
@@ -105,31 +110,39 @@ Amount: 199 টাকা <br><br>
 </div>
 
 <script>
-const PASSWORD = "SIAM2025";   // 🔑 নিজের পাসওয়ার্ড
-const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; // 🔗 Apps Script URL
-const OMDB_API_KEY = "ac57015f"; // 🔑 তোমার OMDb API Key
+const PASSWORD = "SIAM2025";   
+const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; 
+const OMDB_API_KEY = "ac57015f"; 
 
 function toggle(id){
   let e=document.getElementById(id);
   e.style.display=e.style.display==="block"?"none":"block";
 }
 
+// 🔹 Unlock
 function unlockAll(){
   let p=document.getElementById("passInput").value;
   if(p===PASSWORD){
     localStorage.setItem("ok","1");
     document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
     document.getElementById("paymentBox").style.display="none";
-    document.getElementById("aiCircle").style.display="flex"; // AI show
+    showAICircle();
   }else{
     alert("ভুল পাসওয়ার্ড");
   }
 }
 
+// 🔹 Show AI Circle with animation
+function showAICircle(){
+  let c=document.getElementById("aiCircle");
+  c.style.display="flex";
+  setTimeout(()=>{c.style.transform="scale(1)";},50);
+}
+
 if(localStorage.getItem("ok")){
   document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
   document.getElementById("paymentBox").style.display="none";
-  document.getElementById("aiCircle").style.display="flex";
+  showAICircle();
 }
 
 function togglePassword(){
@@ -143,19 +156,25 @@ document.getElementById("emailForm").onsubmit=function(e){
     method:"POST",
     body:new URLSearchParams({email:this.email.value})
   })
-  .then(()=>{
-    alert("ধন্যবাদ 🙏 আপনার ইমেলে দ্রুত পাসওয়ার্ড পাঠানো হবে");
-  })
-  .catch(()=>{
-    alert("সমস্যা হয়েছে, পরে চেষ্টা করুন");
-  });
+  .then(()=>{ alert("ধন্যবাদ 🙏 আপনার ইমেলে দ্রুত পাসওয়ার্ড পাঠানো হবে"); })
+  .catch(()=>{ alert("সমস্যা হয়েছে, পরে চেষ্টা করুন"); });
   this.reset();
 };
 
-// 🔹 Toggle AI Box
+// 🔹 Toggle AI Box with fade-in/out
 function toggleAI(){
   let box=document.getElementById("aiBox");
-  box.style.display = box.style.display==="block"?"none":"block";
+  if(box.style.display==="block"){
+    box.style.opacity=0;
+    box.style.transform="translateY(20px)";
+    setTimeout(()=>{box.style.display="none";},300);
+  }else{
+    box.style.display="block";
+    setTimeout(()=>{
+      box.style.opacity=1;
+      box.style.transform="translateY(0)";
+    },10);
+  }
 }
 
 // 🔹 AI Movie Search + Bengali Translate
@@ -169,7 +188,6 @@ async function searchMovie(){
     let res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(name)}`);
     let data = await res.json();
     if(data.Response==="True"){
-      // Translate plot
       let plotEN = data.Plot;
       try{
         let tRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plotEN)}`);
@@ -187,9 +205,8 @@ async function searchMovie(){
         console.log(err);
         box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;
       }
-
     }else{
-      box.innerHTML="Movie পাওয়া যায়নি 😔";
+      box.innerHTML="Movie পাওয়া যায়নি 😔 ভালো করে নাম লিখো";
     }
   }catch(err){
     console.log(err);
