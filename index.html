@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Movie & Game Drive</title>
 
+<!-- LottiePlayer CDN -->
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
 <style>
-/* 🔹 Theme Colors */
 :root {
-  --bg-color: #0f0f0f; /* Dark by default */
+  --bg-color: #0f0f0f; /* default dark */
   --text-color: #f1f5f9;
   --folder-bg: #0ea5e9;
   --folder-text: #fff;
@@ -18,7 +20,6 @@
   --ai-text: #fff;
 }
 
-/* 🔹 Sci-Fi background */
 body {
   font-family:Arial;
   background: radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f);
@@ -36,42 +37,40 @@ h1{text-align:center}
 .link{display:none;margin:6px 0}
 .payment-box{background:var(--payment-bg);color:var(--payment-text);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
 button{background:#22c55e;border:none;color:white;padding:8px 14px;border-radius:6px;cursor:pointer}
-input{padding:8px;width:180px}
+input{padding:8px;width:180px;max-width:80%;}
 .show-pass-btn{background:#3b82f6;color:#fff;border:none;padding:8px;border-radius:6px}
 a{text-decoration:none;font-weight:bold}
 
-/* 🔹 AI Circular Button */
+/* AI circular button */
 #aiCircle{
   display:none;
-  width:80px;
-  height:80px;
-  background:var(--ai-bg);
+  width:90px;
+  height:90px;
   border-radius:50%;
   display:flex;
   justify-content:center;
   align-items:center;
-  color:var(--ai-text);
-  font-weight:bold;
-  font-size:14px;
   cursor:pointer;
   position:fixed;
   bottom:30px;
   right:30px;
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
   z-index:1000;
-  transition:all 0.3s ease;
+  transition: all 0.3s ease, transform 0.3s ease;
   transform:scale(0);
 }
 
-/* 🔹 AI Box */
+/* AI box */
 #aiBox{
   display:none;
   opacity:0;
   position:fixed;
-  bottom:120px;
+  bottom:130px;
   right:30px;
   width:300px;
-  background:#fff;
+  max-width:90%;
+  background:var(--bg-color);
+  color: var(--text-color);
   border-radius:10px;
   padding:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
@@ -80,12 +79,11 @@ a{text-decoration:none;font-weight:bold}
   transform:translateY(20px);
 }
 
-#aiBox input{width:70%;padding:6px;margin-right:5px}
+#aiBox input{width:70%;padding:6px;margin-right:5px;background:#fff;color:#000;border-radius:4px;border:1px solid #ccc}
 #aiBox button{padding:6px 10px}
-#resultBox{margin-top:10px;background:#fefefe;padding:8px;border-radius:8px;max-height:300px;overflow-y:auto}
+#resultBox{margin-top:10px;background:#fefefe;padding:8px;border-radius:8px;max-height:300px;overflow-y:auto;color:#000}
 #resultBox img{max-width:120px;display:block;margin-bottom:5px}
 
-/* 🔹 Theme Switcher Button */
 #themeBtn{
   position:fixed;
   top:20px;
@@ -105,7 +103,6 @@ a{text-decoration:none;font-weight:bold}
 
 <h1>📂 Movie & Game Drive</h1>
 
-<!-- Theme Switcher -->
 <button id="themeBtn" onclick="toggleTheme()">Theme</button>
 
 <div class="payment-box" id="paymentBox">
@@ -138,10 +135,12 @@ Amount: 199 টাকা <br><br>
   </div>
 </div>
 
-<!-- 🔹 AI Circular Button -->
-<div id="aiCircle" onclick="toggleAI()">AI</div>
+<!-- AI circular button with Lottie robot -->
+<div id="aiCircle">
+  <lottie-player id="robotAnim" src="https://assets2.lottiefiles.com/packages/lf20_vx6zgmvy.json"  background="transparent"  speed="1"  style="width:80px; height:80px;" loop autoplay></lottie-player>
+</div>
 
-<!-- 🔹 AI Search Box -->
+<!-- AI search box -->
 <div id="aiBox">
 <h4>🔍 Movie সার্চ</h4>
 <input type="text" id="movieInput" placeholder="Movie name লিখুন">
@@ -152,14 +151,10 @@ Amount: 199 টাকা <br><br>
 <script>
 const PASSWORD = "SIAM2025";   
 const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; 
-const OMDB_API_KEY = "ac57015f"; // 🔑 তোমার কোডড API key
+const OMDB_API_KEY = "ac57015f";
 
-function toggle(id){
-  let e=document.getElementById(id);
-  e.style.display=e.style.display==="block"?"none":"block";
-}
-
-// 🔹 Unlock
+// Unlock functions
+function toggle(id){let e=document.getElementById(id); e.style.display=e.style.display==="block"?"none":"block";}
 function unlockAll(){
   let p=document.getElementById("passInput").value;
   if(p===PASSWORD){
@@ -167,63 +162,32 @@ function unlockAll(){
     document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
     document.getElementById("paymentBox").style.display="none";
     showAICircle();
-  }else{
-    alert("ভুল পাসওয়ার্ড");
-  }
+  }else{ alert("ভুল পাসওয়ার্ড"); }
 }
-
-// 🔹 Show AI Circle with animation
-function showAICircle(){
-  let c=document.getElementById("aiCircle");
-  c.style.display="flex";
-  setTimeout(()=>{c.style.transform="scale(1)";},50);
-}
-
-if(localStorage.getItem("ok")){
-  document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
-  document.getElementById("paymentBox").style.display="none";
-  showAICircle();
-}
-
-function togglePassword(){
-  let i=document.getElementById("passInput");
-  i.type=i.type==="password"?"text":"password";
-}
+function showAICircle(){ let c=document.getElementById("aiCircle"); c.style.display="flex"; setTimeout(()=>{c.style.transform="scale(1)";},50);}
+if(localStorage.getItem("ok")){document.querySelectorAll(".unlock").forEach(e=>e.style.display="block"); document.getElementById("paymentBox").style.display="none"; showAICircle();}
+function togglePassword(){ let i=document.getElementById("passInput"); i.type=i.type==="password"?"text":"password";}
 
 document.getElementById("emailForm").onsubmit=function(e){
   e.preventDefault();
-  fetch(SCRIPT_URL,{
-    method:"POST",
-    body:new URLSearchParams({email:this.email.value})
-  })
+  fetch(SCRIPT_URL,{method:"POST", body:new URLSearchParams({email:this.email.value})})
   .then(()=>{ alert("ধন্যবাদ 🙏 আপনার ইমেলে দ্রুত পাসওয়ার্ড পাঠানো হবে"); })
   .catch(()=>{ alert("সমস্যা হয়েছে, পরে চেষ্টা করুন"); });
   this.reset();
 };
 
-// 🔹 Toggle AI Box with fade-in/out
+// AI Box toggle
 function toggleAI(){
   let box=document.getElementById("aiBox");
-  if(box.style.display==="block"){
-    box.style.opacity=0;
-    box.style.transform="translateY(20px)";
-    setTimeout(()=>{box.style.display="none";},300);
-  }else{
-    box.style.display="block";
-    setTimeout(()=>{
-      box.style.opacity=1;
-      box.style.transform="translateY(0)";
-    },10);
-  }
+  if(box.style.display==="block"){box.style.opacity=0; box.style.transform="translateY(20px)"; setTimeout(()=>{box.style.display="none";},300);}
+  else{box.style.display="block"; setTimeout(()=>{box.style.opacity=1; box.style.transform="translateY(0)";},10);}
 }
 
-// 🔹 AI Movie Search + Bengali Translate
+// AI search + Bengali translation
 async function searchMovie(){
   let name=document.getElementById("movieInput").value.trim();
   if(!name){ alert("Movie name লিখুন"); return; }
-  let box=document.getElementById("resultBox");
-  box.innerHTML="Searching...";
-
+  let box=document.getElementById("resultBox"); box.innerHTML="Searching...";
   try{
     let res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(name)}`);
     let data = await res.json();
@@ -233,43 +197,16 @@ async function searchMovie(){
         let tRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plotEN)}`);
         let tJson = await tRes.json();
         let plotBN = tJson[0].map(p=>p[0]).join("");
-
-        box.innerHTML=`
-          <h4>${data.Title} (${data.Year})</h4>
-          <img src="${data.Poster}" alt="Poster">
-          <p><strong>Actor(s):</strong> ${data.Actors}</p>
-          <p><strong>Plot:</strong> ${plotBN}</p>
-          <p><strong>IMDB Rating:</strong> ${data.imdbRating}</p>
-        `;
-      }catch(err){
-        console.log(err);
-        box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;
-      }
-    }else{
-      box.innerHTML="Movie পাওয়া যায়নি 😔";
-    }
-  }catch(err){
-    console.log(err);
-    box.innerHTML="Error হয়েছে, পরে চেষ্টা করুন";
-  }
+        box.innerHTML=`<h4>${data.Title} (${data.Year})</h4><img src="${data.Poster}" alt="Poster"><p><strong>Actor(s):</strong> ${data.Actors}</p><p><strong>Plot:</strong> ${plotBN}</p><p><strong>IMDB Rating:</strong> ${data.imdbRating}</p>`;
+      }catch(err){ box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;}
+    }else{ box.innerHTML="Movie পাওয়া যায়নি 😔";}
+  }catch(err){ box.innerHTML="Error হয়েছে, পরে চেষ্টা করুন";}
 }
 
-// 🔹 Theme Switcher
-function toggleTheme(){
+// Theme switch + save
+function applyTheme(theme){
   let root=document.documentElement;
-  if(root.style.getPropertyValue('--bg-color') === '#ffffff'){
-    // Switch to dark
-    root.style.setProperty('--bg-color','#0f0f0f');
-    root.style.setProperty('--text-color','#f1f5f9');
-    root.style.setProperty('--folder-bg','#0ea5e9');
-    root.style.setProperty('--folder-text','#fff');
-    root.style.setProperty('--payment-bg','#fef3c7');
-    root.style.setProperty('--payment-text','#000');
-    root.style.setProperty('--ai-bg','#ef4444');
-    root.style.setProperty('--ai-text','#fff');
-    document.body.style.background='radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f)';
-  }else{
-    // Switch to light
+  if(theme==='light'){
     root.style.setProperty('--bg-color','#ffffff');
     root.style.setProperty('--text-color','#000');
     root.style.setProperty('--folder-bg','#3b82f6');
@@ -279,7 +216,27 @@ function toggleTheme(){
     root.style.setProperty('--ai-bg','#ef4444');
     root.style.setProperty('--ai-text','#fff');
     document.body.style.background='radial-gradient(circle at 20% 30%, #ffffff, #e0e0e0)';
+  }else{
+    root.style.setProperty('--bg-color','#0f0f0f');
+    root.style.setProperty('--text-color','#f1f5f9');
+    root.style.setProperty('--folder-bg','#0ea5e9');
+    root.style.setProperty('--folder-text','#fff');
+    root.style.setProperty('--payment-bg','#fef3c7');
+    root.style.setProperty('--payment-text','#000');
+    root.style.setProperty('--ai-bg','#ef4444');
+    root.style.setProperty('--ai-text','#fff');
+    document.body.style.background='radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f)';
   }
+  localStorage.setItem('theme',theme);
+}
+function toggleTheme(){
+  let current=localStorage.getItem('theme') || 'dark';
+  let next=current==='dark'?'light':'dark';
+  applyTheme(next);
+}
+window.onload=function(){
+  let saved=localStorage.getItem('theme')||'dark';
+  applyTheme(saved);
 }
 </script>
 
