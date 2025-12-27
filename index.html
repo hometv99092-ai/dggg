@@ -1,0 +1,202 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie & Game Drive</title>
+
+<style>
+body{font-family:Arial;background:#f1f5f9;padding:20px}
+h1{text-align:center}
+.folder{background:#0ea5e9;color:#fff;padding:8px;margin:6px 0;border-radius:6px;cursor:pointer}
+.subfolder{display:none;margin-left:20px}
+.link{display:none;margin:6px 0}
+.payment-box{background:#fef3c7;padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
+button{background:#22c55e;border:none;color:white;padding:8px 14px;border-radius:6px;cursor:pointer}
+input{padding:8px;width:180px}
+.show-pass-btn{background:#3b82f6;color:#fff;border:none;padding:8px;border-radius:6px}
+a{text-decoration:none;font-weight:bold}
+
+/* 🔹 AI Circular Button */
+#aiCircle{
+  display:none;
+  width:80px;
+  height:80px;
+  background:#ef4444;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  z-index:1000;
+}
+
+/* 🔹 AI Box */
+#aiBox{
+  display:none;
+  position:fixed;
+  bottom:120px;
+  right:30px;
+  width:300px;
+  background:#fff;
+  border-radius:10px;
+  padding:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  z-index:1001;
+}
+
+#aiBox input{width:70%;padding:6px;margin-right:5px}
+#aiBox button{padding:6px 10px}
+#resultBox{margin-top:10px;background:#fefefe;padding:8px;border-radius:8px;max-height:300px;overflow-y:auto}
+#resultBox img{max-width:120px;display:block;margin-bottom:5px}
+</style>
+</head>
+
+<body>
+
+<h1>📂 Movie & Game Drive</h1>
+
+<div class="payment-box" id="paymentBox">
+<h3>🔐 সাবস্ক্রিপশন</h3>
+bKash / Nagad: 01XXXXXXXXX <br>
+Amount: 199 টাকা <br><br>
+
+<input type="password" id="passInput" placeholder="পাসওয়ার্ড দিন">
+<button class="show-pass-btn" onclick="togglePassword()">👁</button><br><br>
+<button onclick="unlockAll()">Access</button>
+
+<hr>
+
+<h4>📧 পাসওয়ার্ড পেতে ইমেইল দিন</h4>
+<form id="emailForm">
+<input type="email" name="email" required placeholder="আপনার ইমেইল">
+<br><br>
+<button type="submit">Send</button>
+</form>
+</div>
+
+<div class="folder" onclick="toggle('movies')">🎬 মুভি</div>
+<div class="subfolder" id="movies">
+  <div class="folder" onclick="toggle('m1')">মুভি এক</div>
+  <div class="subfolder" id="m1">
+    <div class="link unlock">
+      <a href="#">▶ ভিডিও দেখো</a> |
+      <a href="#">⬇ ডাউনলোড</a>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 AI Circular Button -->
+<div id="aiCircle" onclick="toggleAI()">AI</div>
+
+<!-- 🔹 AI Search Box -->
+<div id="aiBox">
+<h4>🔍 Movie সার্চ</h4>
+<input type="text" id="movieInput" placeholder="Movie name লিখুন">
+<button onclick="searchMovie()">Search</button>
+<div id="resultBox"></div>
+</div>
+
+<script>
+const PASSWORD = "SIAM2025";   // 🔑 নিজের পাসওয়ার্ড
+const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; // 🔗 Apps Script URL
+const OMDB_API_KEY = "ac57015f"; // 🔑 তোমার OMDb API Key
+
+function toggle(id){
+  let e=document.getElementById(id);
+  e.style.display=e.style.display==="block"?"none":"block";
+}
+
+function unlockAll(){
+  let p=document.getElementById("passInput").value;
+  if(p===PASSWORD){
+    localStorage.setItem("ok","1");
+    document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
+    document.getElementById("paymentBox").style.display="none";
+    document.getElementById("aiCircle").style.display="flex"; // AI show
+  }else{
+    alert("ভুল পাসওয়ার্ড");
+  }
+}
+
+if(localStorage.getItem("ok")){
+  document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
+  document.getElementById("paymentBox").style.display="none";
+  document.getElementById("aiCircle").style.display="flex";
+}
+
+function togglePassword(){
+  let i=document.getElementById("passInput");
+  i.type=i.type==="password"?"text":"password";
+}
+
+document.getElementById("emailForm").onsubmit=function(e){
+  e.preventDefault();
+  fetch(SCRIPT_URL,{
+    method:"POST",
+    body:new URLSearchParams({email:this.email.value})
+  })
+  .then(()=>{
+    alert("ধন্যবাদ 🙏 আপনার ইমেলে দ্রুত পাসওয়ার্ড পাঠানো হবে");
+  })
+  .catch(()=>{
+    alert("সমস্যা হয়েছে, পরে চেষ্টা করুন");
+  });
+  this.reset();
+};
+
+// 🔹 Toggle AI Box
+function toggleAI(){
+  let box=document.getElementById("aiBox");
+  box.style.display = box.style.display==="block"?"none":"block";
+}
+
+// 🔹 AI Movie Search + Bengali Translate
+async function searchMovie(){
+  let name=document.getElementById("movieInput").value.trim();
+  if(!name){ alert("Movie name লিখুন"); return; }
+  let box=document.getElementById("resultBox");
+  box.innerHTML="Searching...";
+
+  try{
+    let res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(name)}`);
+    let data = await res.json();
+    if(data.Response==="True"){
+      // Translate plot
+      let plotEN = data.Plot;
+      try{
+        let tRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plotEN)}`);
+        let tJson = await tRes.json();
+        let plotBN = tJson[0].map(p=>p[0]).join("");
+
+        box.innerHTML=`
+          <h4>${data.Title} (${data.Year})</h4>
+          <img src="${data.Poster}" alt="Poster">
+          <p><strong>Actor(s):</strong> ${data.Actors}</p>
+          <p><strong>Plot:</strong> ${plotBN}</p>
+          <p><strong>IMDB Rating:</strong> ${data.imdbRating}</p>
+        `;
+      }catch(err){
+        console.log(err);
+        box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;
+      }
+
+    }else{
+      box.innerHTML="Movie পাওয়া যায়নি 😔";
+    }
+  }catch(err){
+    console.log(err);
+    box.innerHTML="Error হয়েছে, পরে চেষ্টা করুন";
+  }
+}
+</script>
+
+</body>
+</html>
