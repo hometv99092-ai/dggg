@@ -49,7 +49,7 @@ async function searchMovie() {
   results.prepend(movieDiv);
 
   try {
-    const omdbApiKey = "তোমার_OMDB_API_KEY"; // সরাসরি বসাও
+    const omdbApiKey = "ac57015f"; // সরাসরি বসাও
     const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
     const data = await res.json();
 
