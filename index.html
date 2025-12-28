@@ -43,7 +43,7 @@ button:hover{opacity:0.9;}
 input{padding:8px;width:180px;margin-top:8px;border-radius:6px;border:none;}
 .show-pass-btn{background:#3b82f6;color:#fff;}
 a{text-decoration:none;font-weight:bold;}
-#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:250px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
+#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:300px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
 .msg-user{text-align:right;margin:6px 0;}
 .msg-ai{text-align:left;margin:6px 0;}
 .bubble-user{background:#22c55e;color:white;padding:6px 10px;border-radius:12px;display:inline-block;}
@@ -80,6 +80,8 @@ a{text-decoration:none;font-weight:bold;}
  box-shadow:0 4px 15px rgba(0,0,0,.3);
  z-index:999;
  overflow:hidden;
+ display:flex;
+ flex-direction:column;
 }
 #aiContainer input{
  width:calc(100% - 10px);
@@ -90,6 +92,7 @@ a{text-decoration:none;font-weight:bold;}
  background:#3b82f6;
  margin-top:5px;
 }
+#aiChat{flex:1; overflow-y:auto;}
 </style>
 </head>
 <body>
@@ -160,12 +163,12 @@ function togglePassword(){
   i.type=i.type==="password"?"text":"password";
 }
 
-// 🔹 Floating AI Toggle
+// Floating AI Toggle
 function toggleAI(){
   aiContainer.style.display = aiContainer.style.display==="block"?"none":"block";
 }
 
-// 🔹 Theme Toggle
+// Theme Toggle
 function toggleTheme(){
   let t=document.body.classList.contains("dark")?"light":"dark";
   document.body.className=t;
@@ -174,16 +177,26 @@ function toggleTheme(){
 let savedTheme=localStorage.getItem("theme")||"dark";
 document.body.className=savedTheme;
 
-// 🔹 AI Function (OMDB + Translate + Poster)
+// AI Function (OMDB + Translate + Poster + Multiple Search)
 async function sendAI(){
   let text=document.getElementById("aiInput").value.trim();
   if(!text) return;
   let chat=document.getElementById("aiChat");
-  chat.innerHTML+=`<div class="msg-user"><span class="bubble-user">${text}</span></div>`;
   document.getElementById("aiInput").value="";
+
+  // User message
+  let userMsg=document.createElement("div");
+  userMsg.className="msg-user";
+  userMsg.innerHTML=`<span class="bubble-user">${text}</span>`;
+  chat.appendChild(userMsg);
   chat.scrollTop=chat.scrollHeight;
 
-  chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">🤖 ভাবছি...</span></div>`;
+  // AI thinking
+  let aiMsg=document.createElement("div");
+  aiMsg.className="msg-ai";
+  aiMsg.innerHTML=`<span class="bubble-ai">🤖 ভাবছি...</span>`;
+  chat.appendChild(aiMsg);
+  chat.scrollTop=chat.scrollHeight;
 
   try{
     let r=await fetch(`https://www.omdbapi.com/?apikey=ac57015f&t=${encodeURIComponent(text)}`);
@@ -201,12 +214,11 @@ async function sendAI(){
       }
     }
 
-    chat.lastElementChild.remove();
-    chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">${reply}</span></div>`;
+    aiMsg.innerHTML=`<span class="bubble-ai">${reply}</span>`;
     chat.scrollTop=chat.scrollHeight;
+
   }catch{
-    chat.lastElementChild.remove();
-    chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">⚠️ সমস্যা হয়েছে, পরে চেষ্টা করো</span></div>`;
+    aiMsg.innerHTML=`<span class="bubble-ai">⚠️ সমস্যা হয়েছে, পরে চেষ্টা করো</span>`;
     chat.scrollTop=chat.scrollHeight;
   }
 }
