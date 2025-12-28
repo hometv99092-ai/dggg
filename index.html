@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
@@ -43,7 +43,7 @@ button:hover{opacity:0.9;}
 input{padding:8px;width:180px;margin-top:8px;border-radius:6px;border:none;}
 .show-pass-btn{background:#3b82f6;color:#fff;}
 a{text-decoration:none;font-weight:bold;}
-#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:300px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
+#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:250px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
 .msg-user{text-align:right;margin:6px 0;}
 .msg-ai{text-align:left;margin:6px 0;}
 .bubble-user{background:#22c55e;color:white;padding:6px 10px;border-radius:12px;display:inline-block;}
@@ -66,12 +66,14 @@ a{text-decoration:none;font-weight:bold;}
  box-shadow:0 4px 15px rgba(0,0,0,.3);
  z-index:999;
 }
+
+/* AI Container */
 #aiContainer{
  position:fixed;
  bottom:90px;
  right:20px;
  width:300px;
- max-height:400px;
+ height:400px;
  display:none;
  background:rgba(0,0,0,0.8);
  color:white;
@@ -82,7 +84,17 @@ a{text-decoration:none;font-weight:bold;}
  overflow:hidden;
  display:flex;
  flex-direction:column;
+ resize:both;
 }
+
+/* Fullscreen class */
+#aiContainer.fullscreen{
+ top:0; left:0; right:0; bottom:0;
+ width:100%;
+ height:100%;
+ border-radius:0;
+}
+
 #aiContainer input{
  width:calc(100% - 10px);
  margin-top:5px;
@@ -93,6 +105,11 @@ a{text-decoration:none;font-weight:bold;}
  margin-top:5px;
 }
 #aiChat{flex:1; overflow-y:auto;}
+#fullscreenBtn{
+ width:100%;
+ background:#f59e0b;
+ margin-top:5px;
+}
 </style>
 </head>
 <body>
@@ -126,6 +143,7 @@ Amount: 199 টাকা <br><br>
 <div id="aiContainer">
 <h3>🤖 AI Chat</h3>
 <button id="themeBtn" onclick="toggleTheme()">Theme পরিবর্তন করুন</button>
+<button id="fullscreenBtn" onclick="toggleFullscreen()">Fullscreen Toggle</button>
 <div id="aiChat"></div>
 <input id="aiInput" placeholder="Movie বা প্রশ্ন লিখুন">
 <button onclick="sendAI()">Send</button>
@@ -165,7 +183,14 @@ function togglePassword(){
 
 // Floating AI Toggle
 function toggleAI(){
-  aiContainer.style.display = aiContainer.style.display==="block"?"none":"block";
+  let ai=document.getElementById("aiContainer");
+  ai.style.display = ai.style.display==="block"?"none":"flex";
+}
+
+// Fullscreen Toggle
+function toggleFullscreen(){
+  let ai=document.getElementById("aiContainer");
+  ai.classList.toggle("fullscreen");
 }
 
 // Theme Toggle
@@ -177,7 +202,7 @@ function toggleTheme(){
 let savedTheme=localStorage.getItem("theme")||"dark";
 document.body.className=savedTheme;
 
-// AI Function (OMDB + Translate + Poster + Multiple Search)
+// AI Function (OMDB + Translate + Poster + Multi Search)
 async function sendAI(){
   let text=document.getElementById("aiInput").value.trim();
   if(!text) return;
