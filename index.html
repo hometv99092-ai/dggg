@@ -2,249 +2,75 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie & Game Drive + AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>বাংলা AI Movie Service</title>
 <style>
-body{
- font-family:Arial;
- margin:0;
- padding:20px;
- transition: background 0.5s, color 0.5s;
-}
+body { background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px; transition: background 0.3s, color 0.3s; }
+body.light { background:#f1f5f9; color:#111; }
 
-/* Sci-Fi Dark / Light background */
-body.dark{
- background:#020617;
- color:#f8fafc;
-}
-body.dark::before{
- content:"";
- position:fixed;
- top:0; left:0;
- width:100%; height:100%;
- background: radial-gradient(circle, #0d0d1a 1px, transparent 1px),
-             radial-gradient(circle, #0d0d1a 1px, transparent 1px);
- background-size: 20px 20px;
- z-index:-1;
-}
-body.light{
- background:#f1f5f9;
- color:#111;
-}
-
-/* Common Styles */
-h1{text-align:center;}
-.folder{background:#0ea5e9;color:#fff;padding:8px;margin:6px 0;border-radius:6px;cursor:pointer;}
-.subfolder{display:none;margin-left:20px;}
-.link{display:none;margin:6px 0;}
-.payment-box{background:rgba(254,243,199,0.9);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px;}
-button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;transition:0.3s;}
-button:hover{opacity:0.9;}
-input{padding:8px;width:180px;margin-top:8px;border-radius:6px;border:none;}
-.show-pass-btn{background:#3b82f6;color:#fff;}
-a{text-decoration:none;font-weight:bold;}
-#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:250px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
-.msg-user{text-align:right;margin:6px 0;}
-.msg-ai{text-align:left;margin:6px 0;}
-.bubble-user{background:#22c55e;color:white;padding:6px 10px;border-radius:12px;display:inline-block;}
-.bubble-ai{background:#e5e7eb;color:black;padding:6px 10px;border-radius:12px;display:inline-block;}
-#aiChat img{max-width:100%;border-radius:10px;margin-top:5px;}
-
-/* Floating AI Button */
-#aiBtn{
- position:fixed;
- bottom:20px;
- right:20px;
- width:60px;
- height:60px;
- border-radius:50%;
- background:#22c55e;
- color:white;
- border:none;
- font-size:20px;
- cursor:pointer;
- box-shadow:0 4px 15px rgba(0,0,0,.3);
- z-index:999;
-}
-
-/* AI Container */
-#aiContainer{
- position:fixed;
- bottom:90px;
- right:20px;
- width:300px;
- height:400px;
- display:none;
- background:rgba(0,0,0,0.8);
- color:white;
- border-radius:12px;
- padding:10px;
- box-shadow:0 4px 15px rgba(0,0,0,.3);
- z-index:999;
- overflow:hidden;
- display:flex;
- flex-direction:column;
- resize:both;
-}
-
-/* Fullscreen class */
-#aiContainer.fullscreen{
- top:0; left:0; right:0; bottom:0;
- width:100%;
- height:100%;
- border-radius:0;
-}
-
-#aiContainer input{
- width:calc(100% - 10px);
- margin-top:5px;
-}
-#themeBtn{
- width:100%;
- background:#3b82f6;
- margin-top:5px;
-}
-#aiChat{flex:1; overflow-y:auto;}
-#fullscreenBtn{
- width:100%;
- background:#f59e0b;
- margin-top:5px;
-}
+input, button { padding:10px; margin:5px; border-radius:5px; border:none; }
+button { background:#4CAF50; color:#fff; cursor:pointer; }
+img { width:200px; border-radius:10px; margin-top:10px; }
+#results { margin-top:20px; font-size:16px; text-align:left; max-width:500px; margin-left:auto; margin-right:auto; }
+.movie-item { margin-bottom:20px; border-bottom:1px solid #555; padding-bottom:10px; }
+#themeBtn { background:#3b82f6; margin-top:10px; width:120px; }
 </style>
 </head>
 <body>
 
-<h1>📂 Movie & Game Drive</h1>
+<h2>🎬 বাংলা AI Movie Service</h2>
 
-<div class="payment-box" id="paymentBox">
-<h3>🔐 সাবস্ক্রিপশন</h3>
-bKash / Nagad: 01XXXXXXXXX <br>
-Amount: 199 টাকা <br><br>
-<input type="password" id="passInput" placeholder="পাসওয়ার্ড দিন">
-<button class="show-pass-btn" onclick="togglePassword()">👁</button><br><br>
-<button onclick="unlockAll()">Access</button>
-</div>
+<input id="q" placeholder="মুভির নাম লিখুন (BN / EN)">
+<button onclick="searchMovie()">Search</button>
+<button id="themeBtn" onclick="toggleTheme()">Theme</button>
 
-<div id="movieSection" style="display:none">
-<div class="folder" onclick="toggle('movies')">🎬 মুভি</div>
-<div class="subfolder" id="movies">
-  <div class="folder" onclick="toggle('m1')">মুভি এক</div>
-  <div class="subfolder" id="m1">
-    <div class="link unlock">
-      <a href="#">▶ ভিডিও দেখো</a> |
-      <a href="#">⬇ ডাউনলোড</a>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- Floating AI Button -->
-<button id="aiBtn" onclick="toggleAI()">AI</button>
-<div id="aiContainer">
-<h3>🤖 AI Chat</h3>
-<button id="themeBtn" onclick="toggleTheme()">Theme পরিবর্তন করুন</button>
-<button id="fullscreenBtn" onclick="toggleFullscreen()">Fullscreen Toggle</button>
-<div id="aiChat"></div>
-<input id="aiInput" placeholder="Movie বা প্রশ্ন লিখুন">
-<button onclick="sendAI()">Send</button>
-</div>
+<div id="results"></div>
 
 <script>
-const PASSWORD="SIAM2025";
-
-function toggle(id){
-  let e=document.getElementById(id);
-  e.style.display=e.style.display==="block"?"none":"block";
-}
-
-function unlockAll(){
-  let p=document.getElementById("passInput").value;
-  if(p===PASSWORD){
-    localStorage.setItem("ok","1");
-    document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
-    document.getElementById("paymentBox").style.display="none";
-    document.getElementById("movieSection").style.display="block";
-  }else{
-    alert("ভুল পাসওয়ার্ড");
-  }
-}
-
-if(localStorage.getItem("ok")){
-  document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
-  document.getElementById("paymentBox").style.display="none";
-  document.getElementById("movieSection").style.display="block";
-}
-
-// Toggle password visibility
-function togglePassword(){
-  let i=document.getElementById("passInput");
-  i.type=i.type==="password"?"text":"password";
-}
-
-// Floating AI Toggle
-function toggleAI(){
-  let ai=document.getElementById("aiContainer");
-  ai.style.display = ai.style.display==="block"?"none":"flex";
-}
-
-// Fullscreen Toggle
-function toggleFullscreen(){
-  let ai=document.getElementById("aiContainer");
-  ai.classList.toggle("fullscreen");
-}
-
-// Theme Toggle
+// Theme toggle
 function toggleTheme(){
-  let t=document.body.classList.contains("dark")?"light":"dark";
-  document.body.className=t;
-  localStorage.setItem("theme",t);
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme", document.body.classList.contains("light")?"light":"dark");
 }
-let savedTheme=localStorage.getItem("theme")||"dark";
-document.body.className=savedTheme;
+let savedTheme = localStorage.getItem("theme")||"dark";
+if(savedTheme==="light") document.body.classList.add("light");
 
-// AI Function (OMDB + Translate + Poster + Multi Search)
-async function sendAI(){
-  let text=document.getElementById("aiInput").value.trim();
-  if(!text) return;
-  let chat=document.getElementById("aiChat");
-  document.getElementById("aiInput").value="";
+// Search Movie function
+async function searchMovie() {
+  const movieName = document.getElementById("q").value.trim();
+  if(!movieName) return;
 
-  // User message
-  let userMsg=document.createElement("div");
-  userMsg.className="msg-user";
-  userMsg.innerHTML=`<span class="bubble-user">${text}</span>`;
-  chat.appendChild(userMsg);
-  chat.scrollTop=chat.scrollHeight;
+  const results = document.getElementById("results");
 
-  // AI thinking
-  let aiMsg=document.createElement("div");
-  aiMsg.className="msg-ai";
-  aiMsg.innerHTML=`<span class="bubble-ai">🤖 ভাবছি...</span>`;
-  chat.appendChild(aiMsg);
-  chat.scrollTop=chat.scrollHeight;
+  // Create new movie item
+  const movieDiv = document.createElement("div");
+  movieDiv.className = "movie-item";
+  movieDiv.innerText = "Loading...";
+  results.prepend(movieDiv);
 
-  try{
-    let r=await fetch(`https://www.omdbapi.com/?apikey=ac57015f&t=${encodeURIComponent(text)}`);
-    let d=await r.json();
+  try {
+    const omdbApiKey = "তোমার_OMDB_API_KEY"; // সরাসরি বসাও
+    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
+    const data = await res.json();
 
-    let reply="দুঃখিত 😔 মুভি পাওয়া যায়নি।";
-    if(d.Response==="True"){
-      let t=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q="+encodeURIComponent(d.Plot));
-      let j=await t.json();
-      let bn=j[0].map(x=>x[0]).join("");
-
-      reply=`<strong>${d.Title} (${d.Year})</strong><br>⭐ IMDB: ${d.imdbRating}<br>🎭 ${d.Actors}<br>📝 ${bn}`;
-      if(d.Poster && d.Poster!=="N/A"){
-        reply+=`<br><img src="${d.Poster}" alt="Poster">`;
-      }
+    if(data.Response==="False"){
+      movieDiv.innerText = "❌ মুভি পাওয়া যায়নি";
+      return;
     }
 
-    aiMsg.innerHTML=`<span class="bubble-ai">${reply}</span>`;
-    chat.scrollTop=chat.scrollHeight;
+    // Translate Plot to Bengali
+    let plot = data.Plot;
+    try {
+      const tr = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plot)}`);
+      const trJson = await tr.json();
+      plot = trJson[0].map(x=>x[0]).join("");
+    } catch{}
 
-  }catch{
-    aiMsg.innerHTML=`<span class="bubble-ai">⚠️ সমস্যা হয়েছে, পরে চেষ্টা করো</span>`;
-    chat.scrollTop=chat.scrollHeight;
+    movieDiv.innerHTML = `<strong>${data.Title} (${data.Year})</strong><br>⭐ IMDB: ${data.imdbRating}<br>🎭 ${data.Actors}<br>📝 ${plot}<br><img src="${data.Poster}" alt="Poster">`;
+
+  } catch(err){
+    movieDiv.innerText="❌ কিছু ভুল হয়েছে, পরে চেষ্টা করুন";
+    console.error(err);
   }
 }
 </script>
