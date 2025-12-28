@@ -3,126 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie & Game Drive</title>
-
-<!-- LottiePlayer CDN -->
-<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-
+<title>Movie & Game Drive + AI</title>
 <style>
-:root {
-  --bg-color: #0f0f0f;
-  --text-color: #f1f5f9;
-  --folder-bg: #0ea5e9;
-  --folder-text: #fff;
-  --payment-bg: #fef3c7;
-  --payment-text: #000;
-  --ai-bg: #ef4444;
-  --ai-text: #fff;
+body{
+ font-family:Arial;
+ margin:0;
+ padding:20px;
+ transition: background 0.5s, color 0.5s;
 }
 
-body {
-  font-family:Arial;
-  background: radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f);
-  background-image: url('https://images.unsplash.com/photo-1622101103666-0e3f248b0a2e?auto=format&fit=crop&w=1950&q=80');
-  background-size: cover;
-  background-blend-mode: overlay;
-  color: var(--text-color);
-  padding:20px;
-  transition: all 0.3s ease;
+/* Sci-Fi Dark / Light background */
+body.dark{
+ background:#020617;
+ color:#f8fafc;
+}
+body.dark::before{
+ content:"";
+ position:fixed;
+ top:0; left:0;
+ width:100%; height:100%;
+ background: radial-gradient(circle, #0d0d1a 1px, transparent 1px),
+             radial-gradient(circle, #0d0d1a 1px, transparent 1px);
+ background-size: 20px 20px;
+ z-index:-1;
+}
+body.light{
+ background:#f1f5f9;
+ color:#111;
 }
 
-h1{text-align:center}
-.folder{background:var(--folder-bg);color:var(--folder-text);padding:8px;margin:6px 0;border-radius:6px;cursor:pointer}
-.subfolder{display:none;margin-left:20px;transition:all 0.3s ease;}
-.link{display:none;margin:6px 0}
-.payment-box{background:var(--payment-bg);color:var(--payment-text);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px}
-button{background:#22c55e;border:none;color:white;padding:8px 14px;border-radius:6px;cursor:pointer}
-input{padding:8px;width:180px;max-width:80%;}
-.show-pass-btn{background:#3b82f6;color:#fff;border:none;padding:8px;border-radius:6px}
-a{text-decoration:none;font-weight:bold}
+/* Common Styles */
+h1{text-align:center;}
+.folder{background:#0ea5e9;color:#fff;padding:8px;margin:6px 0;border-radius:6px;cursor:pointer;}
+.subfolder{display:none;margin-left:20px;}
+.link{display:none;margin:6px 0;}
+.payment-box{background:rgba(254,243,199,0.9);padding:15px;border-radius:10px;text-align:center;margin-bottom:20px;}
+button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;transition:0.3s;}
+button:hover{opacity:0.9;}
+input{padding:8px;width:180px;margin-top:8px;border-radius:6px;border:none;}
+.show-pass-btn{background:#3b82f6;color:#fff;}
+a{text-decoration:none;font-weight:bold;}
+#aiChat{border:1px solid #ccc;padding:10px;margin-top:10px;max-height:250px;overflow-y:auto;background:rgba(255,255,255,0.08);border-radius:10px;}
+.msg-user{text-align:right;margin:6px 0;}
+.msg-ai{text-align:left;margin:6px 0;}
+.bubble-user{background:#22c55e;color:white;padding:6px 10px;border-radius:12px;display:inline-block;}
+.bubble-ai{background:#e5e7eb;color:black;padding:6px 10px;border-radius:12px;display:inline-block;}
+#aiChat img{max-width:100%;border-radius:10px;margin-top:5px;}
 
-/* AI circular button */
-#aiCircle{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  position:fixed;
-  bottom:30px;
-  right:30px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
-  z-index:1000;
-  transition: all 0.3s ease, transform 0.3s ease;
-  background:var(--ai-bg);
+/* Floating AI Button */
+#aiBtn{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ width:60px;
+ height:60px;
+ border-radius:50%;
+ background:#22c55e;
+ color:white;
+ border:none;
+ font-size:20px;
+ cursor:pointer;
+ box-shadow:0 4px 15px rgba(0,0,0,.3);
+ z-index:999;
 }
-
-/* AI box */
-#aiBox{
-  display:none;
-  opacity:0;
-  position:fixed;
-  bottom:130px;
-  right:30px;
-  width:300px;
-  max-width:90%;
-  background:var(--bg-color);
-  color: var(--text-color);
-  border-radius:10px;
-  padding:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
-  z-index:1001;
-  transition:opacity 0.3s ease, transform 0.3s ease;
-  transform:translateY(20px);
+#aiContainer{
+ position:fixed;
+ bottom:90px;
+ right:20px;
+ width:300px;
+ max-height:400px;
+ display:none;
+ background:rgba(0,0,0,0.8);
+ color:white;
+ border-radius:12px;
+ padding:10px;
+ box-shadow:0 4px 15px rgba(0,0,0,.3);
+ z-index:999;
+ overflow:hidden;
 }
-
-#aiBox input{width:70%;padding:6px;margin-right:5px;background:#fff;color:#000;border-radius:4px;border:1px solid #ccc}
-#aiBox button{padding:6px 10px}
-#resultBox{margin-top:10px;background:#fefefe;padding:8px;border-radius:8px;max-height:300px;overflow-y:auto;color:#000}
-#resultBox img{max-width:120px;display:block;margin-bottom:5px}
-
+#aiContainer input{
+ width:calc(100% - 10px);
+ margin-top:5px;
+}
 #themeBtn{
-  position:fixed;
-  top:20px;
-  right:30px;
-  padding:10px 14px;
-  background:#22c55e;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  z-index:1002;
+ width:100%;
+ background:#3b82f6;
+ margin-top:5px;
 }
 </style>
 </head>
-
 <body>
 
 <h1>📂 Movie & Game Drive</h1>
-
-<button id="themeBtn" onclick="toggleTheme()">Theme</button>
 
 <div class="payment-box" id="paymentBox">
 <h3>🔐 সাবস্ক্রিপশন</h3>
 bKash / Nagad: 01XXXXXXXXX <br>
 Amount: 199 টাকা <br><br>
-
 <input type="password" id="passInput" placeholder="পাসওয়ার্ড দিন">
 <button class="show-pass-btn" onclick="togglePassword()">👁</button><br><br>
 <button onclick="unlockAll()">Access</button>
-
-<hr>
-
-<h4>📧 পাসওয়ার্ড পেতে ইমেইল দিন</h4>
-<form id="emailForm">
-<input type="email" name="email" required placeholder="আপনার ইমেইল">
-<br><br>
-<button type="submit">Send</button>
-</form>
 </div>
 
+<div id="movieSection" style="display:none">
 <div class="folder" onclick="toggle('movies')">🎬 মুভি</div>
 <div class="subfolder" id="movies">
   <div class="folder" onclick="toggle('m1')">মুভি এক</div>
@@ -133,106 +116,99 @@ Amount: 199 টাকা <br><br>
     </div>
   </div>
 </div>
-
-<!-- AI circular button with working Lottie robot -->
-<div id="aiCircle" onclick="toggleAI()">
-  <lottie-player id="robotAnim" src="https://assets2.lottiefiles.com/private_files/lf30_editor_r0kht4.json"  background="transparent"  speed="1"  style="width:80px; height:80px;" loop autoplay></lottie-player>
 </div>
 
-<!-- AI search box -->
-<div id="aiBox">
-<h4>🔍 Movie সার্চ</h4>
-<input type="text" id="movieInput" placeholder="Movie name লিখুন">
-<button onclick="searchMovie()">Search</button>
-<div id="resultBox"></div>
+<!-- Floating AI Button -->
+<button id="aiBtn" onclick="toggleAI()">AI</button>
+<div id="aiContainer">
+<h3>🤖 AI Chat</h3>
+<button id="themeBtn" onclick="toggleTheme()">Theme পরিবর্তন করুন</button>
+<div id="aiChat"></div>
+<input id="aiInput" placeholder="Movie বা প্রশ্ন লিখুন">
+<button onclick="sendAI()">Send</button>
 </div>
 
 <script>
-const PASSWORD = "SIAM2025";   
-const SCRIPT_URL = "PASTE_SCRIPT_URL_HERE"; 
-const OMDB_API_KEY = "ac57015f";
+const PASSWORD="SIAM2025";
 
-// Unlock & UI
-function toggle(id){let e=document.getElementById(id); e.style.display=e.style.display==="block"?"none":"block";}
+function toggle(id){
+  let e=document.getElementById(id);
+  e.style.display=e.style.display==="block"?"none":"block";
+}
+
 function unlockAll(){
   let p=document.getElementById("passInput").value;
   if(p===PASSWORD){
     localStorage.setItem("ok","1");
     document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
     document.getElementById("paymentBox").style.display="none";
-  }else{ alert("ভুল পাসওয়ার্ড"); }
-}
-function togglePassword(){ let i=document.getElementById("passInput"); i.type=i.type==="password"?"text":"password";}
-
-document.getElementById("emailForm").onsubmit=function(e){
-  e.preventDefault();
-  fetch(SCRIPT_URL,{method:"POST", body:new URLSearchParams({email:this.email.value})})
-  .then(()=>{ alert("ধন্যবাদ 🙏 আপনার ইমেলে দ্রুত পাসওয়ার্ড পাঠানো হবে"); })
-  .catch(()=>{ alert("সমস্যা হয়েছে, পরে চেষ্টা করুন"); });
-  this.reset();
-};
-
-// AI Box toggle
-function toggleAI(){
-  let box=document.getElementById("aiBox");
-  if(box.style.display==="block"){box.style.opacity=0; box.style.transform="translateY(20px)"; setTimeout(()=>{box.style.display="none";},300);}
-  else{box.style.display="block"; setTimeout(()=>{box.style.opacity=1; box.style.transform="translateY(0)";},10);}
-}
-
-// AI search + Bengali translation
-async function searchMovie(){
-  let name=document.getElementById("movieInput").value.trim();
-  if(!name){ alert("Movie name লিখুন"); return; }
-  let box=document.getElementById("resultBox"); box.innerHTML="Searching...";
-  try{
-    let res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(name)}`);
-    let data = await res.json();
-    if(data.Response==="True"){
-      let plotEN = data.Plot;
-      try{
-        let tRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plotEN)}`);
-        let tJson = await tRes.json();
-        let plotBN = tJson[0].map(p=>p[0]).join("");
-        box.innerHTML=`<h4>${data.Title} (${data.Year})</h4><img src="${data.Poster}" alt="Poster"><p><strong>Actor(s):</strong> ${data.Actors}</p><p><strong>Plot:</strong> ${plotBN}</p><p><strong>IMDB Rating:</strong> ${data.imdbRating}</p>`;
-      }catch(err){ box.innerHTML=`Plot translate হয়নি, English plot দেখানো হলো:<br>${plotEN}`;}
-    }else{ box.innerHTML="Movie পাওয়া যায়নি 😔";}
-  }catch(err){ box.innerHTML="Error হয়েছে, পরে চেষ্টা করুন";}
-}
-
-// Theme switch + save
-function applyTheme(theme){
-  let root=document.documentElement;
-  if(theme==='light'){
-    root.style.setProperty('--bg-color','#ffffff');
-    root.style.setProperty('--text-color','#000');
-    root.style.setProperty('--folder-bg','#3b82f6');
-    root.style.setProperty('--folder-text','#fff');
-    root.style.setProperty('--payment-bg','#fde68a');
-    root.style.setProperty('--payment-text','#000');
-    root.style.setProperty('--ai-bg','#ef4444');
-    root.style.setProperty('--ai-text','#fff');
-    document.body.style.background='radial-gradient(circle at 20% 30%, #ffffff, #e0e0e0)';
+    document.getElementById("movieSection").style.display="block";
   }else{
-    root.style.setProperty('--bg-color','#0f0f0f');
-    root.style.setProperty('--text-color','#f1f5f9');
-    root.style.setProperty('--folder-bg','#0ea5e9');
-    root.style.setProperty('--folder-text','#fff');
-    root.style.setProperty('--payment-bg','#fef3c7');
-    root.style.setProperty('--payment-text','#000');
-    root.style.setProperty('--ai-bg','#ef4444');
-    root.style.setProperty('--ai-text','#fff');
-    document.body.style.background='radial-gradient(circle at 20% 30%, #0a0a0a, #1b1b2f)';
+    alert("ভুল পাসওয়ার্ড");
   }
-  localStorage.setItem('theme',theme);
 }
+
+if(localStorage.getItem("ok")){
+  document.querySelectorAll(".unlock").forEach(e=>e.style.display="block");
+  document.getElementById("paymentBox").style.display="none";
+  document.getElementById("movieSection").style.display="block";
+}
+
+// Toggle password visibility
+function togglePassword(){
+  let i=document.getElementById("passInput");
+  i.type=i.type==="password"?"text":"password";
+}
+
+// 🔹 Floating AI Toggle
+function toggleAI(){
+  aiContainer.style.display = aiContainer.style.display==="block"?"none":"block";
+}
+
+// 🔹 Theme Toggle
 function toggleTheme(){
-  let current=localStorage.getItem('theme') || 'dark';
-  let next=current==='dark'?'light':'dark';
-  applyTheme(next);
+  let t=document.body.classList.contains("dark")?"light":"dark";
+  document.body.className=t;
+  localStorage.setItem("theme",t);
 }
-window.onload=function(){
-  let saved=localStorage.getItem('theme')||'dark';
-  applyTheme(saved);
+let savedTheme=localStorage.getItem("theme")||"dark";
+document.body.className=savedTheme;
+
+// 🔹 AI Function (OMDB + Translate + Poster)
+async function sendAI(){
+  let text=document.getElementById("aiInput").value.trim();
+  if(!text) return;
+  let chat=document.getElementById("aiChat");
+  chat.innerHTML+=`<div class="msg-user"><span class="bubble-user">${text}</span></div>`;
+  document.getElementById("aiInput").value="";
+  chat.scrollTop=chat.scrollHeight;
+
+  chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">🤖 ভাবছি...</span></div>`;
+
+  try{
+    let r=await fetch(`https://www.omdbapi.com/?apikey=ac57015f&t=${encodeURIComponent(text)}`);
+    let d=await r.json();
+
+    let reply="দুঃখিত 😔 মুভি পাওয়া যায়নি।";
+    if(d.Response==="True"){
+      let t=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q="+encodeURIComponent(d.Plot));
+      let j=await t.json();
+      let bn=j[0].map(x=>x[0]).join("");
+
+      reply=`<strong>${d.Title} (${d.Year})</strong><br>⭐ IMDB: ${d.imdbRating}<br>🎭 ${d.Actors}<br>📝 ${bn}`;
+      if(d.Poster && d.Poster!=="N/A"){
+        reply+=`<br><img src="${d.Poster}" alt="Poster">`;
+      }
+    }
+
+    chat.lastElementChild.remove();
+    chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">${reply}</span></div>`;
+    chat.scrollTop=chat.scrollHeight;
+  }catch{
+    chat.lastElementChild.remove();
+    chat.innerHTML+=`<div class="msg-ai"><span class="bubble-ai">⚠️ সমস্যা হয়েছে, পরে চেষ্টা করো</span></div>`;
+    chat.scrollTop=chat.scrollHeight;
+  }
 }
 </script>
 
