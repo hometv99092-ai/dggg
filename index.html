@@ -5,75 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>বাংলা AI Movie Service</title>
 <style>
-body { background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px; transition: background 0.3s, color 0.3s; }
-body.light { background:#f1f5f9; color:#111; }
-
+body { background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px; }
 input, button { padding:10px; margin:5px; border-radius:5px; border:none; }
 button { background:#4CAF50; color:#fff; cursor:pointer; }
 img { width:200px; border-radius:10px; margin-top:10px; }
-#results { margin-top:20px; font-size:16px; text-align:left; max-width:500px; margin-left:auto; margin-right:auto; }
-.movie-item { margin-bottom:20px; border-bottom:1px solid #555; padding-bottom:10px; }
-#themeBtn { background:#3b82f6; margin-top:10px; width:120px; }
+#result { margin-top:20px; font-size:18px; }
 </style>
 </head>
 <body>
-
 <h2>🎬 বাংলা AI Movie Service</h2>
 
 <input id="q" placeholder="মুভির নাম লিখুন (BN / EN)">
 <button onclick="searchMovie()">Search</button>
-<button id="themeBtn" onclick="toggleTheme()">Theme</button>
 
-<div id="results"></div>
+<p id="result"></p>
+<img id="poster" src="">
 
 <script>
-// Theme toggle
-function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light")?"light":"dark");
-}
-let savedTheme = localStorage.getItem("theme")||"dark";
-if(savedTheme==="light") document.body.classList.add("light");
-
-// Search Movie function
 async function searchMovie() {
-  const movieName = document.getElementById("q").value.trim();
-  if(!movieName) return;
+  const movieName = document.getElementById("q").value;
+  const resultEl = document.getElementById("result");
+  const posterEl = document.getElementById("poster");
 
-  const results = document.getElementById("results");
-
-  // Create new movie item
-  const movieDiv = document.createElement("div");
-  movieDiv.className = "movie-item";
-  movieDiv.innerText = "Loading...";
-  results.prepend(movieDiv);
+  resultEl.innerText = "Loading...";
+  posterEl.src = "";
 
   try {
-    const omdbApiKey = "ac57015f"; // সরাসরি বসাও
-    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
-    const data = await res.json();
+    // OMDb API call
+    const omdbApiKey = "ac57015f"; // .env না হলে সরাসরি এখানে বসাও
+    const omdbRes = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
+    const movieData = await omdbRes.json();
 
-    if(data.Response==="False"){
-      movieDiv.innerText = "❌ মুভি পাওয়া যায়নি";
+    if(movieData.Response === "False"){
+      resultEl.innerText = "❌ দুঃখিত, মুভির তথ্য পাওয়া যায়নি";
       return;
     }
 
-    // Translate Plot to Bengali
-    let plot = data.Plot;
-    try {
-      const tr = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(plot)}`);
-      const trJson = await tr.json();
-      plot = trJson[0].map(x=>x[0]).join("");
-    } catch{}
+    // Movie info
+    const name = movieData.Title;
+    const year = movieData.Year;
+    const actors = movieData.Actors;
+    const plot = movieData.Plot;
+    const poster = movieData.Poster;
 
-    movieDiv.innerHTML = `<strong>${data.Title} (${data.Year})</strong><br>⭐ IMDB: ${data.imdbRating}<br>🎭 ${data.Actors}<br>📝 ${plot}<br><img src="${data.Poster}" alt="Poster">`;
+    // Simple AI style Bengali explanation (frontend JS)
+    resultEl.innerText = `নাম: ${name}\nসাল: ${year}\nঅভিনেতা: ${actors}\nপ্লট: ${plot}`;
+    posterEl.src = poster;
 
-  } catch(err){
-    movieDiv.innerText="❌ কিছু ভুল হয়েছে, পরে চেষ্টা করুন";
+  } catch(err) {
+    resultEl.innerText = "❌ কিছু ভুল হয়েছে, আবার চেষ্টা করুন";
     console.error(err);
   }
 }
 </script>
-
 </body>
 </html>
