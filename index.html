@@ -2,60 +2,73 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>বাংলা AI Movie Service</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Audio Player</title>
 <style>
-body { background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px; }
-input, button { padding:10px; margin:5px; border-radius:5px; border:none; }
-button { background:#4CAF50; color:#fff; cursor:pointer; }
-img { width:200px; border-radius:10px; margin-top:10px; }
-#result { margin-top:20px; font-size:18px; }
+  body{font-family:sans-serif; margin:20px;}
+  #results div{cursor:pointer; margin:10px 0; display:flex; align-items:center; border:1px solid #ddd; padding:5px; border-radius:5px;}
+  #results img{width:120px; margin-right:10px; border-radius:5px;}
+  #youtube-player{width:0; height:0; border:0;} /* hidden iframe for audio */
+  button{margin:5px; padding:8px 15px;}
+  input[type="text"]{padding:8px; width:60%;}
 </style>
 </head>
 <body>
-<h2>🎬 বাংলা AI Movie Service</h2>
 
-<input id="q" placeholder="মুভির নাম লিখুন (BN / EN)">
-<button onclick="searchMovie()">Search</button>
+<h2>YouTube Audio Player (Spotune style)</h2>
 
-<p id="result"></p>
-<img id="poster" src="">
+<input type="text" id="search-box" placeholder="Search YouTube...">
+<button onclick="searchVideo()">Search</button>
 
+<div id="results"></div>
+
+<div>
+  <button onclick="playPauseSong()">Play/Pause</button>
+  Volume: <input type="range" id="volume" min="0" max="100" value="50" onchange="setVolume(this.value)">
+</div>
+
+<iframe id="youtube-player" frameborder="0" allow="autoplay"></iframe>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-async function searchMovie() {
-  const movieName = document.getElementById("q").value;
-  const resultEl = document.getElementById("result");
-  const posterEl = document.getElementById("poster");
+let player;
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player');
+}
 
-  resultEl.innerText = "Loading...";
-  posterEl.src = "";
+async function searchVideo() {
+    const query = document.getElementById('search-box').value;
+    if(!query) return alert("Please type something to search!");
+    
+    const apiKey = 'AIzaSyAWmTfbLo_lUooiHeOkKhevEFQnypwSNG8'; // তোমার দেওয়া Key
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${apiKey}`);
+    const data = await res.json();
 
-  try {
-    // OMDb API call
-    const omdbApiKey = "ac57015f"; // .env না হলে সরাসরি এখানে বসাও
-    const omdbRes = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
-    const movieData = await omdbRes.json();
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+    data.items.forEach(item => {
+        const videoId = item.id.videoId;
+        const title = item.snippet.title;
+        const thumb = item.snippet.thumbnails.default.url;
 
-    if(movieData.Response === "False"){
-      resultEl.innerText = "❌ দুঃখিত, মুভির তথ্য পাওয়া যায়নি";
-      return;
-    }
+        const div = document.createElement('div');
+        div.innerHTML = `<img src="${thumb}" alt=""><span>${title}</span>`;
+        div.onclick = () => playAudio(videoId);
+        resultsDiv.appendChild(div);
+    });
+}
 
-    // Movie info
-    const name = movieData.Title;
-    const year = movieData.Year;
-    const actors = movieData.Actors;
-    const plot = movieData.Plot;
-    const poster = movieData.Poster;
+function playAudio(videoId) {
+    player.loadVideoById(videoId);
+}
 
-    // Simple AI style Bengali explanation (frontend JS)
-    resultEl.innerText = `নাম: ${name}\nসাল: ${year}\nঅভিনেতা: ${actors}\nপ্লট: ${plot}`;
-    posterEl.src = poster;
+function playPauseSong() {
+    if(player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+    else player.playVideo();
+}
 
-  } catch(err) {
-    resultEl.innerText = "❌ কিছু ভুল হয়েছে, আবার চেষ্টা করুন";
-    console.error(err);
-  }
+function setVolume(v) {
+    player.setVolume(v);
 }
 </script>
 </body>
