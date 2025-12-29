@@ -3,61 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Audio Player</title>
+<title>YouTube Audio Only</title>
+
 <style>
-  body{font-family:sans-serif; margin:20px;}
-  #results div{
-    cursor:pointer; margin:10px 0; display:flex; align-items:center;
-    border:1px solid #ddd; padding:5px; border-radius:5px;
-  }
-  #results img{width:120px; margin-right:10px; border-radius:5px;}
-  #youtube-player{width:0; height:0; border:0;} /* hidden iframe for audio */
-  button{margin:5px; padding:8px 15px;}
-  input[type="text"]{padding:8px; width:60%;}
+body { font-family: sans-serif; margin: 20px; }
+.result {
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  padding: 6px;
+}
+.result img { width: 120px; }
+#player { width:1px; height:1px; }
 </style>
 </head>
+
 <body>
 
-<h2>YouTube Audio Player</h2>
+<h3>YouTube Audio Only</h3>
 
-<input type="text" id="search-box" placeholder="Search YouTube...">
-<button onclick="searchVideo()">Search</button>
+<input id="q" placeholder="Search YouTube">
+<button onclick="search()">Search</button>
 
 <div id="results"></div>
 
-<iframe id="youtube-player" frameborder="0" allow="autoplay"></iframe>
+<div id="player"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let currentPlayer;
+let player;
+let selectedVideo = null;
 
-// সার্চ ভিডিও
-async function searchVideo() {
-    const query = document.getElementById('search-box').value;
-    if(!query) return alert("Please type something to search!");
-
-    const apiKey = 'AIzaSyAWmTfbLo_lUooiHeOkKhevEFQnypwSNG8';
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${apiKey}`);
-    const data = await res.json();
-
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '';
-    data.items.forEach(item => {
-        const videoId = item.id.videoId;
-        const title = item.snippet.title;
-        const thumb = item.snippet.thumbnails.default.url;
-
-        const div = document.createElement('div');
-        div.innerHTML = `<img src="${thumb}" alt=""><span>${title}</span>`;
-        div.onclick = () => playAudio(videoId);
-        resultsDiv.appendChild(div);
-    });
+function onYouTubeIframeAPIReady(){
+  player = new YT.Player('player', {
+    height:'1',
+    width:'1',
+    playerVars:{ playsinline:1 },
+  });
 }
 
-// অডিও প্লে
-function playAudio(videoId) {
-    const iframe = document.getElementById('youtube-player');
-    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&loop=0&rel=0&modestbranding=1`;
+async function search(){
+  const q = document.getElementById('q').value;
+  const key = 'AIzaSyAWmTfbLo_lUooiHeOkKhevEFQnypwSNG8';
+
+  const r = await fetch(
+    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&maxResults=10&key=${key}`
+  );
+  const d = await r.json();
+
+  const box = document.getElementById('results');
+  box.innerHTML = '';
+
+  d.items.forEach(v=>{
+    const div = document.createElement('div');
+    div.className = 'result';
+    div.innerHTML = `
+      <img src="${v.snippet.thumbnails.default.url}">
+      <span>${v.snippet.title}</span>
+    `;
+    div.onclick = ()=> play(v.id.videoId);
+    box.appendChild(div);
+  });
+}
+
+function play(id){
+  player.loadVideoById(id);
 }
 </script>
+
 </body>
 </html>
