@@ -7,7 +7,7 @@
 
 <style>
 body{font-family:sans-serif;margin:20px}
-.item{border:1px solid #ddd;padding:8px;margin:8px 0;display:flex;gap:10px;align-items:center}
+.item{border:1px solid #ddd;padding:8px;margin:8px 0;display:flex;gap:10px}
 img{width:120px}
 button{padding:6px 12px}
 #player{width:1px;height:1px;overflow:hidden}
@@ -29,8 +29,9 @@ let player;
 
 function onYouTubeIframeAPIReady(){
   player = new YT.Player('player',{
-    height:'1',width:'1',
-    playerVars:{playsinline:1}
+    height:'1',
+    width:'1',
+    playerVars:{ playsinline:1 },
   });
 }
 
@@ -53,15 +54,17 @@ async function search(){
       <img src="${v.snippet.thumbnails.default.url}">
       <div>
         <div>${v.snippet.title}</div>
-        <button onclick="play('${v.id.videoId}')">▶ Play Audio</button>
+        <button onclick="playAudio('${v.id.videoId}')">▶ Play Audio</button>
       </div>
     `;
     box.appendChild(div);
   });
 }
 
-function play(id){
+function playAudio(id){
+  player.mute();                 // 🔑 প্রথমে mute
   player.loadVideoById(id);
+  setTimeout(()=>player.unMute(),300); // 🔊 তারপর sound
 }
 </script>
 
