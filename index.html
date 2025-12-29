@@ -35,23 +35,27 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let player;
-let playerReady = false;
+let readyQueue = []; // ভিডিও লোড করার জন্য অপেক্ষমাণ ভিডিও আইডি
 
 // YouTube IFrame API ready
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('youtube-player', {
         events: {
-            'onReady': () => { playerReady = true; }
+            'onReady': () => {
+                // Ready হওয়ার পরে অপেক্ষমাণ ভিডিও প্লে করা
+                readyQueue.forEach(videoId => player.loadVideoById(videoId));
+                readyQueue = [];
+            }
         }
     });
 }
 
-// Search function
+// সার্চ
 async function searchVideo() {
     const query = document.getElementById('search-box').value;
     if(!query) return alert("Please type something to search!");
 
-    const apiKey = 'AIzaSyAWmTfbLo_lUooiHeOkKhevEFQnypwSNG8'; // সরাসরি Key
+    const apiKey = 'AIzaSyAWmTfbLo_lUooiHeOkKhevEFQnypwSNG8';
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${apiKey}`);
     const data = await res.json();
 
@@ -69,22 +73,27 @@ async function searchVideo() {
     });
 }
 
-// Play audio
+// প্লে
 function playAudio(videoId) {
-    if(!playerReady) return alert("Player is not ready yet!");
-    player.loadVideoById(videoId);
+    if(player && player.loadVideoById) {
+        player.loadVideoById(videoId);
+    } else {
+        // যদি player ready না হয়, অপেক্ষা তালিকায় যোগ করা
+        readyQueue.push(videoId);
+    }
 }
 
-// Play/Pause
+// প্লে/পজ
 function playPauseSong() {
-    if(!playerReady) return;
-    if(player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
-    else player.playVideo();
+    if(player && player.getPlayerState) {
+        if(player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+        else player.playVideo();
+    }
 }
 
-// Volume
+// ভলিউম
 function setVolume(v) {
-    if(playerReady) player.setVolume(v);
+    if(player && player.setVolume) player.setVolume(v);
 }
 </script>
 </body>
